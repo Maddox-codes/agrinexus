@@ -27,5 +27,5 @@ This stateful context is used to filter a 1024-dimensional **Pinecone Serverless
 
 1. **Clone the repository:**
 ```bash
-   git clone [https://github.com/YOUR_USERNAME/agrinexus.git](https://github.com/YOUR_USERNAME/agrinexus.git)
+   git clone [https://github.com/Maddox-codes/agrinexus.git](https://github.com/Maddox-codes/agrinexus.git)
    cd agrinexus
