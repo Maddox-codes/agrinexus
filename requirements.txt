@@ -1,0 +1,18 @@
+# Web Framework & State Management
+streamlit>=1.30.0
+
+# Deep Learning & Computer Vision
+torch>=2.2.0
+torchvision>=0.17.0
+Pillow>=10.2.0
+numpy>=1.26.0
+
+# LLM Orchestration & Vector Database
+cohere>=5.0.0
+pinecone-client>=4.0.0
+
+# Document Parsing (For RAG Ingestion)
+PyPDF2>=3.0.0
+
+# Environment Management
+python-dotenv>=1.0.0
