@@ -77,6 +77,7 @@ Leaf Image
 agrinexus/
 │
 ├── app.py
+|── data_agri_manuals
 ├── train_resnet.py
 ├── ingest_bulk.py
 ├── requirements.txt
