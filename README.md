@@ -1,58 +1,105 @@
+#  AgriNexus
 
-# AgriNexus: Vision-Integrated Stateful Agentic Triage System
+> **Vision-Integrated Stateful Agentic Triage System for Sustainable Crop Disease Management**
 
-## Overview
+AgriNexus is an AI-powered agricultural decision support system that combines computer vision, Retrieval-Augmented Generation (RAG), and stateful AI workflows to generate personalized crop disease management recommendations.
 
-AgriNexus is an advanced AI-driven agricultural decision-support system designed to solve the **"Stateless Diagnosis"** problem in precision agriculture. While traditional Ag-Tech applications act as stateless oracles—identifying diseases but recommending generic, potentially inappropriate chemical treatments—AgriNexus enforces a **Deterministic State Machine** that deliberately pauses the diagnostic workflow to collect a farmer's budget constraints and 14-day pesticide/spray history.
-
-This persistent contextual information is then used to filter a **1024-dimensional Pinecone Serverless Vector Database** and ground the **Cohere `command-r-plus-08-2024`** large language model, enabling the generation of scientifically accurate, organic-first, 7-day **Integrated Pest Management (IPM)** protocols.
+Unlike conventional plant disease detection applications that immediately recommend generic pesticides after image classification, AgriNexus introduces a **Deterministic State Machine** that pauses the diagnostic workflow to collect the farmer's budget constraints and recent pesticide usage history before generating recommendations. This additional context enables safer, more practical, and environmentally responsible treatment plans.
 
 ---
 
-# Core Architecture
+## Features
 
-### 1. Multi-Crop Perception Engine (Model Router)
+*  Multi-crop disease diagnosis using fine-tuned ResNet-18 models
+*  Stateful workflow that collects farmer constraints before reasoning
+*  Retrieval-Augmented Generation (RAG) using official agricultural manuals
+*  Metadata-filtered semantic search with Pinecone
+*  Context-aware recommendations powered by Cohere Command R+
+*  Organic-first Integrated Pest Management (IPM) recommendations
+*  Multi-turn conversational assistant for follow-up agricultural guidance
 
-Three independently fine-tuned **PyTorch ResNet-18** models are isolated by crop domain (Tomato, Potato, and Bell Pepper), eliminating inter-crop class confusion while improving diagnostic accuracy.
+---
 
-### 2. Deterministic State Machine
+# System Architecture
 
-A Streamlit-based state machine prevents premature LLM reasoning by enforcing contextual validation before Retrieval-Augmented Generation (RAG) begins. The application cannot proceed until the required user constraints have been collected.
+```text
+Leaf Image
+     │
+     ▼
+┌──────────────────────────────┐
+│  Crop-Specific ResNet-18     │
+│  Disease Classification      │
+└──────────────┬───────────────┘
+               │
+               ▼
+┌──────────────────────────────┐
+│ Deterministic State Machine  │
+│ Budget + Spray History       │
+└──────────────┬───────────────┘
+               │
+               ▼
+┌──────────────────────────────┐
+│ Pinecone Vector Database     │
+│ Metadata Filtered Retrieval  │
+└──────────────┬───────────────┘
+               │
+               ▼
+┌──────────────────────────────┐
+│ Cohere Command R+            │
+│ Context-Aware IPM Generator  │
+└──────────────┬───────────────┘
+               │
+               ▼
+     Personalized 7-Day
+      Disease Management
+```
 
-### 3. Agentic RAG Layer
+---
 
-Official agricultural manuals from **ICAR**, **UC Davis**, and **Purdue University** were parsed into **981 semantic chunks**, embedded using Cohere's `embed-english-v3.0` model, and indexed inside a Pinecone Serverless vector database. Retrieval uses strict crop-based metadata filtering before context is passed to the language model.
+# Technology Stack
 
-### 4. Multi-Turn LLM Orchestration
-
-The grounded LLM generates personalized IPM recommendations and supports agentic follow-up conversations covering topics such as soil health, nutrient management, irrigation, and additional agronomic practices.
+| Component            | Technology                           |
+| -------------------- | ------------------------------------ |
+| Frontend             | Streamlit                            |
+| Deep Learning        | PyTorch, ResNet-18                   |
+| Dataset              | PlantVillage                         |
+| Vector Database      | Pinecone Serverless                  |
+| Embedding Model      | Cohere `embed-english-v3.0`          |
+| Large Language Model | Cohere `command-r-plus-08-2024`      |
+| Retrieval            | Retrieval-Augmented Generation (RAG) |
+| Document Processing  | PyPDF2                               |
 
 ---
 
 # Repository Structure
 
-```
-.
+```text
+agrinexus/
+│
 ├── app.py
 ├── train_resnet.py
 ├── ingest_bulk.py
 ├── requirements.txt
 ├── .env
-└── models/
+├── models/
+│   ├── agrinexus_tomato_resnet18.pth
+│   ├── agrinexus_potato_resnet18.pth
+│   └── agrinexus_pepper_resnet18.pth
+└── README.md
 ```
 
-| File              | Description                                                                                            |
-| ----------------- | ------------------------------------------------------------------------------------------------------ |
-| `app.py`          | Main Streamlit application implementing the stateful workflow and user interface                       |
-| `train_resnet.py` | PyTorch training script for fine-tuning the ResNet-18 perception models using the PlantVillage dataset |
-| `ingest_bulk.py`  | Pipeline for PDF parsing, Cohere embedding generation, and Pinecone vector database ingestion          |
-| `models/`         | Directory containing the trained `.pth` model weights (not included in repository)                     |
+| File              | Description                            |
+| ----------------- | -------------------------------------- |
+| `app.py`          | Main Streamlit application             |
+| `train_resnet.py` | Model training pipeline                |
+| `ingest_bulk.py`  | Document ingestion and vector indexing |
+| `models/`         | Trained ResNet-18 model weights        |
 
 ---
 
-# Installation & Setup
+# Installation
 
-## 1. Clone the Repository
+## Clone the repository
 
 ```bash
 git clone https://github.com/Maddox-codes/agrinexus.git
@@ -61,25 +108,29 @@ cd agrinexus
 
 ---
 
-## 2. Create a Virtual Environment
-
-To avoid dependency conflicts, create and activate a clean Python virtual environment.
+## Create a virtual environment
 
 ```bash
 python -m venv venv
+```
 
-# Linux / macOS
-source venv/bin/activate
+Activate the environment.
 
-# Windows
+### Windows
+
+```bash
 venv\Scripts\activate
+```
+
+### Linux / macOS
+
+```bash
+source venv/bin/activate
 ```
 
 ---
 
-## 3. Install Dependencies
-
-Install all required software libraries.
+## Install dependencies
 
 ```bash
 pip install --upgrade pip
@@ -88,101 +139,141 @@ pip install -r requirements.txt
 
 ---
 
-## 4. Configure Environment Variables
+## Configure environment variables
 
 Create a `.env` file in the project root.
 
-```text
-COHERE_API_KEY=your_production_cohere_api_key_here
-PINECONE_API_KEY=your_production_pinecone_api_key_here
+```env
+COHERE_API_KEY=your_cohere_api_key
+PINECONE_API_KEY=your_pinecone_api_key
 ```
 
 ---
 
-## 5. Add the Trained Models
+## Add trained model weights
 
-GitHub file size restrictions prevent the trained model weights from being included in the repository.
+Place the trained model files inside the `models/` directory.
 
-Place the following files inside the `models/` directory:
-
-```
+```text
 models/
 ├── agrinexus_tomato_resnet18.pth
 ├── agrinexus_potato_resnet18.pth
 └── agrinexus_pepper_resnet18.pth
 ```
 
+> **Note:** Model weights are not included because they exceed GitHub's file size limit.
+
 ---
 
-# Deployment & Demo Instructions
+# Running the Application
 
-## 1. Launch the Application
-
-Start the Streamlit server.
+Launch the Streamlit application.
 
 ```bash
 streamlit run app.py
 ```
 
----
+The application will be available at
 
-## 2. Open the Dashboard
-
-After initialization, open the following address in your browser:
-
-```
+```text
 http://localhost:8501
 ```
 
 ---
 
-## 3. Execute a Complete Diagnostic Workflow
+# Workflow
 
-### Step 1 – Perception Ingress
+### 1. Upload a Leaf Image
 
-* Select the crop type (Tomato, Potato, or Bell Pepper).
-* Upload a symptomatic leaf image.
-* The application routes the image to the corresponding ResNet-18 model.
-* A disease prediction is generated.
+Select the crop type and upload a diseased leaf image.
 
 ---
 
-### Step 2 – Constraint Interview
+### 2. Disease Classification
 
-The deterministic workflow pauses automatically.
+The appropriate crop-specific ResNet-18 model predicts the disease.
 
-Provide:
+---
+
+### 3. Constraint Collection
+
+The workflow pauses until the user provides:
 
 * Budget category
-* Previous 14-day pesticide/spray history
-
-These constraints unlock the Retrieval-Augmented Generation pipeline.
+* Recent pesticide usage (last 14 days)
 
 ---
 
-### Step 3 – Context-Aware Knowledge Generation
+### 4. Retrieval-Augmented Generation
 
-Click **Generate Context-Aware RAG Protocol**.
-
-The system will:
-
-1. Filter the Pinecone vector database using crop metadata.
-2. Retrieve the most relevant agricultural documents.
-3. Ground the Cohere LLM using the retrieved evidence.
-4. Produce a personalized, organic-first, 7-day Integrated Pest Management protocol.
+The system retrieves relevant agricultural knowledge from Pinecone using metadata-filtered semantic search.
 
 ---
 
-### Step 4 – Agentic Follow-up
+### 5. Recommendation Generation
 
-Continue interacting with the system using the multi-turn chat interface.
+The Cohere LLM generates a personalized **7-day Integrated Pest Management (IPM)** protocol based on:
 
-Example follow-up questions include:
+* Disease prediction
+* Retrieved agricultural literature
+* Farmer constraints
 
-* Soil remediation strategies
-* Irrigation planning
-* Fertilizer recommendations
-* Organic treatment alternatives
-* Preventive disease management
+---
 
-The application maintains conversational session state, enabling context-aware follow-up responses without repeating previously supplied information.
+### 6. Follow-up Assistance
+
+Users can continue asking questions regarding:
+
+* Soil management
+* Irrigation
+* Fertilizer usage
+* Organic alternatives
+* Preventive practices
+
+The assistant maintains conversational context throughout the session.
+
+---
+
+# Knowledge Base
+
+The RAG pipeline is built using official agricultural extension publications, including resources from:
+
+* ICAR
+* UC Davis
+* Purdue University
+
+Documents are:
+
+* Parsed using PyPDF2
+* Split into semantic chunks
+* Embedded using Cohere `embed-english-v3.0`
+* Indexed in Pinecone Serverless
+* Retrieved through metadata-filtered semantic search
+
+---
+
+# Future Improvements
+
+* Support for additional crops
+* Mobile application
+* Regional language support
+* Weather-aware recommendations
+* Satellite and IoT integration
+* Offline deployment for low-connectivity regions
+
+---
+
+# License
+
+This project was developed as part of a Bachelor of Technology (Computer Science & Engineering) project at **Model Institute of Engineering and Technology (MIET), Jammu**.
+
+---
+
+# Author
+
+**Madhur Mahajan**
+
+Computer Science & Engineering
+Model Institute of Engineering and Technology (MIET)
+
+GitHub: https://github.com/Maddox-codes
