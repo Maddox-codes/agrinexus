@@ -272,8 +272,4 @@ This project was developed as part of a Bachelor of Technology (Computer Science
 # Author
 
 **Madhur Mahajan**
-
-Computer Science & Engineering
-Model Institute of Engineering and Technology (MIET)
-
 GitHub: https://github.com/Maddox-codes
